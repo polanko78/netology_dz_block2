@@ -1,5 +1,4 @@
-from application import people
-from application import salary
+from application import people, salary
 
 
 if __name__ == '__main__':
