@@ -1,52 +1,46 @@
 import requests
 import json
-from pprint import pprint
+import time
+
 
 class Country:
 
     def __init__(self, path):
-        self.file = open(path, encoding='utf8')
-        # self.params = {
-        #     'action' : 'opensearch',
-        #     'limit' : 1,
-        #     'search' : country,
-        #     'namespace' : 0
-        # }
+        file = open(path, encoding='utf8')
+        self.json_data = json.load(file)
+        self.counter = 0
 
     def __iter__(self):
         return self
 
     def __next__(self):
-        json_data = json.load(self.file)
-#        for item in json_data:
-        pprint(json_data)
-        self.country = json_data['name']['common']
-        if self.country == 'Zimbabwe':
-            print('Bam!')
-        params = {
-            'action' : 'opensearch',
-            'limit' : 1,
-            'search' : self.country,
-            'namespace' : 0,
-            'format' : 'json'
-        }
-        try:
-            response = requests.get('https://en.wikipedia.org/w/api.php', params = params)
-        except ConnectionError:
-            time.sleep(0.33)
-            response = requests.get('https://en.wikipedia.org/w/api.php', params=params)
-        self.res = response.json()
-#            pprint(self.res)
-#            pprint(self.res[3])
-        return self.res[3]
+        number = len(self.json_data)
+        if self.counter < number:
+            self.country = self.json_data[self.counter]['name']['common']
+            print(self.counter, self.country)
+            params = {
+                'action': 'opensearch',
+                'limit': 1,
+                'search': self.country,
+                'namespace': 0,
+                'format': 'json'
+            }
+            try:
+                response = requests.get('https://en.wikipedia.org/w/api.php', params=params)
+            except ConnectionError:
+                time.sleep(0.33)
+                response = requests.get('https://en.wikipedia.org/w/api.php', params=params)
+            self.res = response.json()
+            self.counter += 1
+            return self.country, self.res[3]
+        else:
+            raise StopIteration
 
 
 if __name__ == '__main__':
+    data_to_file = []
     for i in Country('countries.json'):
-        pprint(i)
-        with open('country_link.json', 'w', encoding='utf8') as file:
-            data = {self.country : i}
-            json.dump(data, file, ensure_ascii=False, indent=1)
-
-
-
+        data = {i[0]: i[1][0]}
+        data_to_file.append(data)
+    with open('country_link.json', 'w', encoding='utf8') as f:
+        json.dump(data_to_file, f, ensure_ascii=False, indent=1)
