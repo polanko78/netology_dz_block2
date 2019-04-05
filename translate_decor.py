@@ -8,10 +8,9 @@ def logger(old_func):
     def newfun(*args, **kwargs):
         start = time.asctime()
         res = old_func(*args, **kwargs)
-        t = str(args)
         with open(path_log, 'a', encoding='utf-8') as file:
             line = [start, '  функция: ', old_func.__name__, '\n']
-            line2 = ['аргументы: ', t, '\n']
+            line2 = ['аргументы: ', str(args), '\n']
             line3 = ['результат: ', str(res), '\n']
             file.writelines(line)
             file.writelines(line2)
