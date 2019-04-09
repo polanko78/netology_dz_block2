@@ -3,11 +3,13 @@ import time
 
 
 def logger(old_func):
-    start = time.asctime()
     def newfun(*args, **kwargs):
         s = []
-        s.append(old_func(*args, **kwargs))
-        print(s)
+        start = time.asctime()
+        res = old_func(*args, **kwargs)
+        print(dir(res))
+        t = res.__
+        print(t)
         with open('my_log.log', 'a', encoding='utf-8') as file:
             line = [start, '  fun: ', old_func.__name__, '   arg: ', '\n']
             file.writelines(line)
