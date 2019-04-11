@@ -39,9 +39,3 @@ class Contact:
         except AttributeError:
             pass
         return data[0]
-
-
-#if __name__ == '__main__':
-
-#    jhon = Contact('Jhon', 'Smith', '+71234567809', telegram='@jhony', email='jhony@smith.com', phnumber2='+755598665')
-#    print(jhon)

@@ -5,94 +5,36 @@ class Phonebook:
 
     def __init__(self, phone_name):
         self.phone_name = phone_name
+        self.contacts = {}
 
-    def contact_def(self, *args, **kwargs):
-        return Contact(*args, **kwargs)
-
-#    def new_contact(self, *args, **kwargs):
-#        name = input('Введите имя: ').capitalize()
-#       suname = input('Введите фамилию: ').capitalize()
-#        phnumber = input('Введите телефон: ')
-#        favorite = input('Внести контакт в избранное? да/нет ')
-#        if favorite == 'да':
-#            favorite = True
-#        elif favorite == 'нет':
-#            favorite = False
-#        else:
-#            print('Вы ввели некоректно данные, наверное вы имели ввиду НЕТ')
-#            favorite = False
-#        print('Дополнительная информация: ')
-#        check = input('Xотите добавить email ? да/нет ')
-#        if check == 'да':
-#            email = input('Введите email: ')
-#            kwargs = {'email': email}
-#        check = input('Xотите добавить telegram ? да/нет ')
-#        if check == 'да':
-#            snet = input('Введите telegram: ')
-#            kwargs['snet'] = snet
-#        check = input('Xотите добавить второй номер ? да/нет ')
-#        if check == 'да':
-#            phnumber2 = input('Введите второй номер: ')
-#            kwargs['phnumber2'] = phnumber2
-#
-#        return Contact(name, suname, phnumber, favorite, *args, **kwargs)
-
+    def contact_def(self, name, *args, **kwargs):
+        cont = Contact(name, *args, **kwargs)
+        self.contacts[name] = cont
 
     def list_contact(self):
-        for item in self.__dict__.keys():
-            print(self.__dict__[item])
-
+        for item in self.contacts.keys():
+            print(self.contacts[item])
 
     def del_cont(self):
+        name_to_del = None
         tel_del = input('Номер телефона: ')
-        for item in self.__dict__.keys():
-            tmp = self.__dict__[item]
-            try:
-                if tel_del == tmp.phnumber:
-                    name_to_del = item
-            except AttributeError:
-                pass
-        self.__dict__.pop(name_to_del)
-
+        for item in self.contacts.keys():
+            if tel_del == self.contacts[item].phnumber:
+                name_to_del = item
+        if not name_to_del:
+            print('Нет такого номера')
+            return
+        self.contacts.pop(name_to_del)
 
     def search_favorite(self):
-        for item in self.__dict__.keys():
-            tmp = self.__dict__[item]
-            try:
-                if tmp.favorite:
-                    print(tmp)
-            except AttributeError:
-                pass
+        for item in self.contacts.keys():
+            if self.contacts[item].favorite:
+                print(self.contacts[item])
 
     def search_name(self):
         name = input('Введите имя: ').capitalize()
         suname = input('Введите фамилию: ').capitalize()
-        suname.capitalize()
-        for item in self.__dict__.keys():
-            tmp = self.__dict__[item]
-            try:
-                if name == tmp.name:
-                    if suname == tmp.surname:
-                        print(tmp)
-            except AttributeError:
-                pass
-
-
-
-#if __name__ == '__main__':
-#    my_book = Phonebook('My book')
-#
-#    my_book.jhon = my_book.contact_def('Jhon', 'Smith', '+71234567809', email='jhony@smith.com')
-#    my_book.ivan = my_book.contact_def('Ivan', 'Ivanov', '+71234544444', favorite=True, phnumber2='+755598665')
-#    my_book.bill = my_book.contact_def('Bill', 'Murrey', '+71235442398', favorite=True, phnumber2='+7565593212', email='bill@murrey.com')
-
-#   my_book.list_contact()
-#  print(my_book.__dict__)
-#my_book.del_cont()
-#    print('_-_-_-_-_-____-__-_')
-#my_book.search_favorite()
-#my_book.search_name()
-#    my_book.test = my_book.new_contact()
-#    my_book.list_contact()
-
-
+        for item in self.contacts.keys():
+            if name == self.contacts[item].name:
+                if suname == self.contacts[item].surname:
+                    print(self.contacts[item])

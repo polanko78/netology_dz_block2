@@ -7,15 +7,15 @@ def menu():
           'Нажмите 1 для вывода контактов' + '\n'
           'Нажмите 2 для добавления нового контакта' + '\n'
           'Нажмите 3 для удаления контакта' + '\n'
-           'Нажмите 4 для для поиска избранных' + '\n'
-           'Нажмите 5 для поиска по имени и фамилии'
+          'Нажмите 4 для для поиска избранных' + '\n'
+          'Нажмите 5 для поиска по имени и фамилии'
           )
     while True:
         x = input()
         if int(x) == 1:
             my_book.list_contact()
         elif int(x) == 2:
-            my_book.new_user = data_for_new_user()
+            data_for_new_user()
         elif int(x) == 3:
             my_book.del_cont()
         elif int(x) == 4:
@@ -28,10 +28,10 @@ def menu():
 
 def start():
     print('Заводим трех пользователей по-умолчанию')
-    my_book.jhon = my_book.contact_def('Jhon', 'Smith', '+71234567809', email='jhony@smith.com')
-    my_book.ivan = my_book.contact_def('Ivan', 'Ivanov', '+71234544444', favorite=True, phnumber2='+755598665')
-    my_book.bill = my_book.contact_def('Bill', 'Murrey', '+71235442398', favorite=True, phnumber2='+7565593212',
-                                       email='bill@murrey.com')
+    my_book.contact_def('Jhon', 'Smith', '+71234567809', email='jhony@smith.com')
+    my_book.contact_def('Ivan', 'Ivanov', '+71234544444', favorite=True, phnumber2='+755598665')
+    my_book.contact_def('Bill', 'Murrey', '+71235442398', favorite=True, phnumber2='+7565593212',
+                        email='bill@murrey.com')
     print('Готово')
 
 
@@ -61,7 +61,8 @@ def data_for_new_user():
     if check == 'да':
         phnumber2 = input('Введите второй номер: ')
         kwargs['phnumber2'] = phnumber2
-    return my_book.contact_def(name, suname, phnumber, favorite, **kwargs)
+    args = (suname, phnumber, favorite)
+    return my_book.contact_def(name, *args, **kwargs)
 
 
 if __name__ == '__main__':
@@ -69,4 +70,3 @@ if __name__ == '__main__':
     my_book = Phonebook(book_name)
     start()
     menu()
-
