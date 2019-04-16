@@ -1,7 +1,7 @@
 def to_file(old_func):
-    def new_fun(data, *args, **kwargs):
+    def new_fun(data, in_file=False, *args, **kwargs):
         data_to_write = old_func(data, *args, **kwargs)
-        if kwargs['in_file'] != False:
+        if in_file != False:
             with open('adv_prn.txt', 'w', encoding='utf-8') as file:
                 for item in data_to_write:
                     file.writelines(item)
@@ -10,7 +10,7 @@ def to_file(old_func):
 
 
 @to_file
-def adv_print(data, start='\n', max_line=None, in_file=False):
+def adv_print(data, start='\n', max_line=None):
     data_to_file = []
     if str(max_line).isdigit():
         if start != '\n':
@@ -35,6 +35,9 @@ def adv_print(data, start='\n', max_line=None, in_file=False):
                 end_point += max_line
     return data_to_file
 
-#adv_print('Привет, мир!', max_line=3)
-#adv_print('Привет, мир!', start='!!!!', max_line=3)
+
+adv_print('Привет, мир!', max_line=3)
+print('___________________')
+adv_print('Привет, мир!', start='!!!!', max_line=3)
+print('___________________')
 adv_print('Привет, мир!', start='!!!!', max_line=3, in_file=True)
