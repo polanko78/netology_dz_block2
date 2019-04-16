@@ -1,4 +1,5 @@
 from class_phonebook import Phonebook
+from class_contact import Contact
 
 
 def menu():
@@ -27,15 +28,24 @@ def menu():
 
 
 def start():
+    global counter
     print('Заводим трех пользователей по-умолчанию')
-    my_book.contact_def('Jhon', 'Smith', '+71234567809', email='jhony@smith.com')
-    my_book.contact_def('Ivan', 'Ivanov', '+71234544444', favorite=True, phnumber2='+755598665')
-    my_book.contact_def('Bill', 'Murrey', '+71235442398', favorite=True, phnumber2='+7565593212',
+    cont = Contact('Jhon', 'Smith', '+71234567809', email='jhony@smith.com')
+    counter += 1
+    my_book.contact_def(counter, cont)
+    cont = Contact('Ivan', 'Ivanov', '+71234544444', favorite=True, phnumber2='+755598665')
+    counter += 1
+    my_book.contact_def(counter, cont)
+    cont = Contact('Bill', 'Murrey', '+71235442398', favorite=True, phnumber2='+7565593212',
                         email='bill@murrey.com')
+    counter += 1
+    my_book.contact_def(counter, cont)
     print('Готово')
 
 
 def data_for_new_user():
+    global counter
+    counter += 1
     kwargs = {}
     name = input('Введите имя: ').capitalize()
     suname = input('Введите фамилию: ').capitalize()
@@ -62,10 +72,12 @@ def data_for_new_user():
         phnumber2 = input('Введите второй номер: ')
         kwargs['phnumber2'] = phnumber2
     args = (suname, phnumber, favorite)
-    return my_book.contact_def(name, *args, **kwargs)
+    cont = Contact(name, *args, **kwargs)
+    return my_book.contact_def(counter, cont)
 
 
 if __name__ == '__main__':
+    counter = 0
     book_name = input('Введите название вашей телефонной книги :')
     my_book = Phonebook(book_name)
     start()

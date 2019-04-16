@@ -7,9 +7,9 @@ class Phonebook:
         self.phone_name = phone_name
         self.contacts = {}
 
-    def contact_def(self, name, *args, **kwargs):
-        cont = Contact(name, *args, **kwargs)
-        self.contacts[name] = cont
+    def contact_def(self, counter, cont):
+#        cont = Contact(name, *args, **kwargs)
+        self.contacts[counter] = cont
 
     def list_contact(self):
         for item in self.contacts.keys():
