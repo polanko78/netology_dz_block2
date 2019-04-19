@@ -1,8 +1,10 @@
 import os
 import json
 import unittest
-from test_dz.app import check_document_existance
-from mock import patch
+from test_dz.app import check_document_existance, remove_doc_from_shelf
+from unittest.mock import patch
+import mock
+
 
 class TestApp(unittest.TestCase):
 
@@ -15,7 +17,22 @@ class TestApp(unittest.TestCase):
         with open(f_doc, 'r') as file:
             self.documents = json.load(file)
 
+    @mock.patch('app.documents')
+    def test_check_document_existance(self, documents):                 # 'этот тест вроде ок.
+        self.assertTrue(check_document_existance("10006"))
+        self.assertFalse(check_document_existance("10016"))
 
-    def test_check_document_existance(self):
-        documents = self.documents
-        check_document_existance("10006")
+    @mock.patch('test_dz.app.directories')
+    def test_remove_doc_from_shelf(self, directories):
+
+        self.assertIn('11-2', directories['1'])     # эта строка выдает ошибку:  AssertionError: '11-2' not found in <MagicMock name='directories.__getitem__()' id='30837040'>
+        remove_doc_from_shelf('11-2')               # эта строка отрабатывается, когда одна
+#        self.assertIn('11-2', directories['1'])
+#        self.assertIn(directories['2'], ["10006"])
+#        self.assertEqual(directories['1'], ("2207 876234", "11-2"))
+
+
+
+if __name__ == '__main__':
+    unittest.main()
+
