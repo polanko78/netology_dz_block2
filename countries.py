@@ -17,7 +17,6 @@ class Country:
         number = len(self.json_data)
         if self.counter < number:
             self.country = self.json_data[self.counter]['name']['common']
-            print(self.counter, self.country)
             params = {
                 'action': 'opensearch',
                 'limit': 1,
