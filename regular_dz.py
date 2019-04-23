@@ -25,7 +25,7 @@ tmp_list = contacts_list
 for it in tmp_list:
     for t in contacts_list:
         if t[0] == it[0]:
-            for x in [1, 2, 3, 4, 5, 6]:
+            for x in range(1, 6):
                 if (t[x] == '' or ' ') and it[x] != '' and it[x] not in new_line:
                     t[x] = it[x]
             try:
