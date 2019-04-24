@@ -17,7 +17,7 @@ students = (
         'gpa': '4,9'
     }
 )
-counter3 = 0
+counter = 0
 
 def create_db():
     with psycopg2.connect(dbname='testbd', user='test', password='12345') as conn:
@@ -55,22 +55,23 @@ def create_db():
 
 
 def add_student(student):
-    global counter3
-    print(type(student['name']), type(student['gpa']), type(student['birth']))
+    global counter
+    print(type(student['name']), type(student['gpa']), student['birth'])
     with psycopg2.connect(dbname='testbd', user='test', password='12345') as conn:
-        counter3 += 1
+        counter += 1
         with conn.cursor() as cur:
             cur.execute('''
                 insert into student (id, name, gpa, birth)
-                values ($s, $s, $s, %s)
-            ''', (counter3, student['name'], student['gpa'], student['birth'], ))
+                values (%s, $s, $s, %s)
+             ''', (counter, student['name'], student['gpa'], student['birth']))
 
 
 def get_student(student_id):
     with psycopg2.connect(dbname='testbd', user='test', password='12345') as conn:
         with conn.cursor() as cur:
             cur.execute('''
-            select $s from student 
+            select * from student 
+            where id = $s
             ''', (student_id, ))
 
 
@@ -111,21 +112,21 @@ def get_students(course_id):
 def add_students(course_id, students):
     # создает студентов и
     # записывает их на курс
+    global counter
     with psycopg2.connect(dbname='testbd', user='test', password='12345') as conn:
         with conn.cursor() as cur:
-            count2 = 0
             for st in students:
-                count2 += 1
+                counter += 1
                 cur.execute('''
                     insert into student
                     (id, name, gpa, birth) values
                     ($s, $s, $s, %s)
-                ''', (count2, st['name'], st['gpa'], st['birth']))
+                ''', (counter, st['name'], st['gpa'], st['birth']))
                 cur.execute('''
                             insert into student_course
                             (student_id, course_id) values
                             (%s)
-                            ''', (count2, course_id))
+                            ''', (counter, course_id))
 
 
 def menu():
@@ -166,6 +167,8 @@ def menu():
 
 
 if __name__ == '__main__':
-    menu()
+#    menu()
 #    create_db()
 #    get_course_short()
+    for item in students:
+        add_student(item)
