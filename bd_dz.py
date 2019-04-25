@@ -1,23 +1,8 @@
 import psycopg2
 
-students = (
-    {
-        'name': 'Михаил Воронин',
-        'birth': '1978-10-10',
-        'gpa': '4,5'
-    },
-    {
-        'name': 'Александр Пушкин',
-        'birth': '1977-02-03',
-        'gpa': '4,8'
-    },
-    {
-        'name': 'Иван Иванов',
-        'birth': '1979-01-01',
-        'gpa': '4,9'
-    }
-)
-counter = 0
+COUNTER = 0
+COUNTER2 = 0
+
 
 def create_db():
     with psycopg2.connect(dbname='testbd', user='test', password='12345') as conn:
@@ -55,24 +40,28 @@ def create_db():
 
 
 def add_student(student):
-    global counter
-    print(type(student['name']), type(student['gpa']), student['birth'])
+    global COUNTER
     with psycopg2.connect(dbname='testbd', user='test', password='12345') as conn:
-        counter += 1
+        COUNTER += 1
         with conn.cursor() as cur:
             cur.execute('''
                 insert into student (id, name, gpa, birth)
-                values (%s, $s, $s, %s)
-             ''', (counter, student['name'], student['gpa'], student['birth']))
+                values (%s, %s, %s, %s)
+             ''', (str(COUNTER), student['name'], student['gpa'], student['birth']))
 
 
 def get_student(student_id):
     with psycopg2.connect(dbname='testbd', user='test', password='12345') as conn:
         with conn.cursor() as cur:
             cur.execute('''
-            select * from student 
-            where id = $s
+            select student.name, student.gpa, student.birth, course.name from student_course
+            join student on student.id = student_course.student_id
+            join course on course.id = student_course.course_id
+            where student.id = %s
             ''', (student_id, ))
+            res = cur.fetchall()
+            for item in res:
+                print(item)
 
 
 def get_students_short():
@@ -103,30 +92,33 @@ def get_students(course_id):
         with conn.cursor() as cur:
             cur.execute('''
             select student.name, course.name from student_course 
-            join student.id = student_course.student.id
-            join course.id = student_course.course.id
-            where course.id = $s            
+            join student on student.id = student_course.student_id
+            join course on course.id = student_course.course_id
+            where course.id = %s            
             ''', (course_id, ))
+            res = cur.fetchall()
+            for item in res:
+                print(item)
 
 
-def add_students(course_id, students):
+def add_students(course_id, student):
     # создает студентов и
     # записывает их на курс
-    global counter
+    global COUNTER, COUNTER2
     with psycopg2.connect(dbname='testbd', user='test', password='12345') as conn:
         with conn.cursor() as cur:
-            for st in students:
-                counter += 1
-                cur.execute('''
-                    insert into student
-                    (id, name, gpa, birth) values
-                    ($s, $s, $s, %s)
-                ''', (counter, st['name'], st['gpa'], st['birth']))
-                cur.execute('''
-                            insert into student_course
-                            (student_id, course_id) values
-                            (%s)
-                            ''', (counter, course_id))
+            COUNTER += 1
+            COUNTER2 += 1
+            cur.execute('''
+                insert into student
+                (id, name, gpa, birth) values
+                (%s, %s, %s, %s)
+                ''', (str(COUNTER), student['name'], student['gpa'], student['birth']))
+            cur.execute('''
+                        insert into student_course
+                        (id, student_id, course_id) values
+                        (%s, %s, %s)
+                        ''', (str(COUNTER2), str(COUNTER), str(course_id)))
 
 
 def menu():
@@ -162,13 +154,16 @@ def menu():
         elif int(com) == 5:
             get_course_short()
             course_id = input('Выберете номер курса: ')
-            print('Студентов добавим из заранее подготовленного словаря.')
-            add_students(course_id, students)
+            name = input('Введите имя: ')
+            gpa = (input('Средний балл'))
+            birth = (input('Дата рождения формата (год-месяц-день): '))
+            student = {
+                'name': name,
+                'gpa': gpa,
+                'birth': birth
+            }
+            add_students(course_id, student)
 
 
 if __name__ == '__main__':
-#    menu()
-#    create_db()
-#    get_course_short()
-    for item in students:
-        add_student(item)
+    menu()
