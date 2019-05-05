@@ -17,7 +17,7 @@ class TestApp(unittest.TestCase):
         with open(f_doc, 'r') as file:
             self.documents = json.load(file)
 
-    @mock.patch('app.documents')
+    @mock.patch('test_dz.app.documents')
     def test_check_document_existance(self, documents):                 # 'этот тест вроде ок.
         self.assertTrue(check_document_existance("10006"))
         self.assertFalse(check_document_existance("10016"))
