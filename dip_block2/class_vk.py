@@ -1,8 +1,15 @@
 class VK_USER:
 
-    def __init__(self, token, user_id):
+    def __init__(self, token, user_id, bdate, books, interests, movies, music, relation, sex):
         self.token = token
         self.user_id = user_id
+        self.bdate = bdate
+        self.books = books
+        self.interests = interests
+        self.movies = movies
+        self.music = music
+        self.relation = relation
+        self.sex = sex
         self.params = {
             'access_token': token,
             'v': 5.92,
