@@ -6,6 +6,10 @@ from urllib.parse import urlparse
 import urllib.request
 import requests
 
+# общие друзья - 2 за друга
+# возраст
+#
+
 
 def get_user_data():
     redirect_url = 'https://oauth.vk.com/blank.html'
@@ -15,7 +19,7 @@ def get_user_data():
     settings = 'friends, groups, status'
     user_data = input('Введите имя или id пользователя :')
     webbrowser.open(
-        'http://oauth.vk.com/authorize?client_id=' + app + '&        scope=' + settings + '&redirect_uri=' + redirect_url + '&display=' + display + '&response_type=token')
+        'http://oauth.vk.com/authorize?client_id=' + app + '&scope=' + settings + '&redirect_uri=' + redirect_url + '&display=' + display + '&response_type=token')
     token = input('Введите token :')
     params = {
         'user_ids': user_data,
@@ -76,12 +80,19 @@ def search(token):
     response = requests.get('https://api.vk.com/method/users.search', params)
     res = response.json()
     pprint(res)
+    return res['response']['items']
+
+def data_analyse(data):
+
+    pass
+
 
 
 if __name__ == '__main__':
     user_id, token, age, books, interests, movies, music, relation,sex = get_user_data()
     user = VK_USER(token, user_id, age, books, interests, movies, music, relation, sex)
-    search(token)
-#    response_gr = requests.get('https://api.vk.com/method/groups.get', user.params)
-#    r = response_gr.json()
-#    print(user)
+    data = search(token)
+    for item in data_analyse(data):
+        print(item)
+
+
