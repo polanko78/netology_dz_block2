@@ -2,6 +2,7 @@ from dip_block2.class_vk import VK_USER
 import webbrowser
 from pprint import pprint
 from datetime import datetime
+from operator import itemgetter
 from urllib.parse import urlparse
 import urllib.request
 import requests
@@ -70,6 +71,7 @@ def search(token):
 
     params = {
         'sex': s,
+        'offset': 333,
         'age_from': user.age - 2,
         'age_to': user.age + 2,
         'count': 1000,
@@ -79,20 +81,64 @@ def search(token):
     }
     response = requests.get('https://api.vk.com/method/users.search', params)
     res = response.json()
-    pprint(res)
+    pprint(res['response']['items'])
     return res['response']['items']
 
 def data_analyse(data):
+    for item in data:
+        counter = 0
+        try:
+            b = item['books'].split()
+            for book in b:
+                if book in user.books:
+                    counter += 2
+                    print('bam!')
+        except KeyError:
+            pass
+        try:
+            m = item['books'].split()
+            for music in m:
+                if music in user.music:
+                    counter += 1
+                    print('tam!')
+        except KeyError:
+            pass
+        try:
+            i = item['interests'].split()
+            for interest in i:
+                if interest in user.interests:
+                    counter += 1
+                    print('int!')
+        except KeyError:
+            pass
+        try:
+            age_tmp = int(datetime.strftime(datetime.now(), "%Y")) - int(item['bdate'][-4:])
+        except Exception:
+            pass
+        else:
+            if age_tmp == user.age:
+                counter += 3
+            elif abs(age_tmp - user.age) == 1:
+                counter += 2
+            elif abs(age_tmp - user.age) == 2:
+                counter += 1
+        user_count = [item['id'], counter]
+        yield user_count
 
-    pass
 
 
 
 if __name__ == '__main__':
+    list = []
     user_id, token, age, books, interests, movies, music, relation,sex = get_user_data()
     user = VK_USER(token, user_id, age, books, interests, movies, music, relation, sex)
+    print(user.books)
     data = search(token)
     for item in data_analyse(data):
-        print(item)
+        list.append(item)
+    itogo = sorted(list, key=itemgetter(1))
+    pprint(itogo)
+
+
 
 
