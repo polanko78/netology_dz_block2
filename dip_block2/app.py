@@ -127,6 +127,15 @@ def data_analyse(data):
         user_count = [item['id'], counter]
         yield user_count
 
+def to_bd(d):
+    client = MongoClient()
+    tindvk_db = client['tvk']
+    data = tindvk_db['data']
+    if tindvk_db['data']:
+        data.drop()
+    for item in d:
+
+
 
 
 if __name__ == '__main__':
@@ -135,15 +144,13 @@ if __name__ == '__main__':
     user = VK_USER(token, user_id)
     user.user_stat(age, books, interests, movies, music, relation, sex)
     get_friend_list(user)
-    print(user.fr_list)
     data = search(token)
     for item in data_analyse(data):
         list.append(item)
     itogo = sorted(list, key=itemgetter(1))
     pprint(itogo)
-    client = MongoClient()
-    tindvk_db = client['tvk']
-    data = tindvk_db['data']
+    to_bd(itogo[-3:])
+
 
 
 
