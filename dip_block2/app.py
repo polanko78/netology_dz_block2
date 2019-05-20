@@ -1,9 +1,11 @@
 from dip_block2.class_vk import VK_USER
 import webbrowser
 from pprint import pprint
+import time
 from datetime import datetime
 from operator import itemgetter
 import requests
+import random
 from pymongo import MongoClient
 
 
@@ -47,6 +49,7 @@ def get_friend_list(x_user):
         if r_fr['error']['error_code'] == 30:
             pass
         elif r_fr['error']['error_code'] == 6:
+            time.sleep(0.3)
             response_fr = requests.get('https://api.vk.com/method/friends.get', x_user.params)
             r_fr = response_fr.json()
     except KeyError:
@@ -66,9 +69,10 @@ def search(token):
         s = 0
     else:
         s = 1
+    offset = random.randint(1, 1000)
     params = {
         'sex': s,
-        'offset': 333,
+        'offset': offset,
         'age_from': user.age - 2,
         'age_to': user.age + 2,
         'count': 1000,
@@ -78,8 +82,59 @@ def search(token):
     }
     response = requests.get('https://api.vk.com/method/users.search', params)
     res = response.json()
-#    pprint(res['response']['items'])
     return res['response']['items']
+
+def get_photo(list):
+    big_res = []
+    for x in list:
+        params = {
+            'owner_id': x[0],
+            'album_id': 'profile',
+            'extended': 1,
+            'count': 1000,
+            'access_token': token,
+            'v': 5.92
+        }
+        response = requests.get('https://api.vk.com/method/photos.get', params)
+        res = response.json()
+        try:
+            if res['error']['error_code'] == 6:
+                time.sleep(0.3)
+                response = requests.get('https://api.vk.com/method/photos.get', params)
+                res = response.json()
+        except KeyError:
+            pass
+        res = sort_photo(response.json())
+        try:
+            my_res = {'id': x[0], 'photo': res}
+        except IndexError:
+            my_res = {'id': x[0], 'photo': 'нет фото'}
+        big_res.append(my_res)
+    print('___________________ИТОГО______________________')
+    pprint(big_res)
+
+
+def sort_photo(res):
+    line = []
+    list = []
+    try:
+        for item in res['response']['items']:
+            for ph_size in item['sizes']:
+                if ph_size['type'] == 'x':
+                    line_tmp = [item['likes']['count'], ph_size['url']]
+                elif ph_size['type'] == 'm':
+                    line_tmp = [item['likes']['count'], ph_size['url']]
+                elif ph_size['type'] == 's':
+                    line_tmp = [item['likes']['count'], ph_size['url']]
+                elif ph_size['type'] == 'o':
+                    line_tmp = [item['likes']['count'], ph_size['url']]
+            line.append(line_tmp)
+        sorted_list = sorted(line, key=itemgetter(0))
+        list = sorted_list[-3:]
+    except KeyError:
+        pass
+    return list
+
 
 def data_analyse(data):
     for item in data:
@@ -134,7 +189,7 @@ def to_bd(d):
     if tindvk_db['data']:
         data.drop()
     for item in d:
-
+        print(item)
 
 
 
@@ -148,8 +203,9 @@ if __name__ == '__main__':
     for item in data_analyse(data):
         list.append(item)
     itogo = sorted(list, key=itemgetter(1))
-    pprint(itogo)
-    to_bd(itogo[-3:])
+#    pprint(itogo)
+    get_photo(itogo[-10:])
+#    to_bd(itogo[-3:])
 
 
 
