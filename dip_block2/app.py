@@ -85,6 +85,7 @@ def search(user):
     }
     response = requests.get('https://api.vk.com/method/users.search', params)
     res = response.json()
+    pprint(res)
     return res['response']['items']
 
 
