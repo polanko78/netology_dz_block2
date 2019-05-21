@@ -1,23 +1,24 @@
 from dip_block2.class_vk import VK_USER
+from dip_block2.photo_file_work import *
 import webbrowser
-from pprint import pprint
 import time
 from datetime import datetime
 from operator import itemgetter
 import requests
 import random
-from pymongo import MongoClient
-import json
 
 
 def get_user_data():
+    global token
     redirect_url = 'https://oauth.vk.com/blank.html'
     app = '6971041'
     display = 'popup'
     settings = 'friends, groups, status'
     user_data = input('Введите имя или id пользователя :')
     webbrowser.open(
-        'http://oauth.vk.com/authorize?client_id=' + app + '&scope=' + settings + '&redirect_uri=' + redirect_url + '&display=' + display + '&response_type=token')
+        'http://oauth.vk.com/authorize?client_id=' + app + '&scope=' + settings + '&redirect_uri=' \
+        + redirect_url + '&display=' + display + '&response_type=token'
+    )
     token = input('Введите token :')
     params = {
         'user_ids': user_data,
@@ -42,6 +43,7 @@ def get_user_data():
         print('{}'.format(res['error']['error_msg']))
     return user_id, token, age, books, interests, movies, music, relation, sex
 
+
 def get_friend_list(x_user):
     friend_list = []
     response_fr = requests.get('https://api.vk.com/method/friends.get', x_user.params)
@@ -63,7 +65,7 @@ def get_friend_list(x_user):
     x_user.friend_list(friend_list)
 
 
-def search(token):
+def search(user):
     if user.sex == 1:
         s = 2,
     elif user.sex == 0:
@@ -77,7 +79,7 @@ def search(token):
         'age_from': user.age - 2,
         'age_to': user.age + 2,
         'count': 1000,
-        'access_token': token,
+        'access_token': user.token,
         'fields': 'bdate, books, interests, music, movies, relation, sex',
         'v': 5.92
     }
@@ -85,79 +87,8 @@ def search(token):
     res = response.json()
     return res['response']['items']
 
-def get_photo(list):
-    big_res = []
-    for x in list:
-        params = {
-            'owner_id': x[0],
-            'album_id': 'profile',
-            'extended': 1,
-            'count': 1000,
-            'access_token': token,
-            'v': 5.92
-        }
-        response = requests.get('https://api.vk.com/method/photos.get', params)
-        res = response.json()
-        try:
-            if res['error']['error_code'] == 6:
-                time.sleep(0.3)
-                response = requests.get('https://api.vk.com/method/photos.get', params)
-                res = response.json()
-        except KeyError:
-            pass
-        res = sort_photo(response.json())
-        if res == []:
-            my_res = {'id': x[0], 'photo': 'нет фото'}
-        else:
-            photo_list = []
-            for pho in res:
-                photo_list.append(pho[1])
-            my_res = {'id': 'https://vk.com/id' + str(x[0]), 'photo': photo_list}
-        big_res.append(my_res)
-#    pprint(big_res)
-    to_file(big_res)
-    to_bd(big_res)
 
-
-def sort_photo(res):
-    line = []
-    list = []
-    try:
-        for item in res['response']['items']:
-            for ph_size in item['sizes']:
-                if ph_size['type'] == 'x':
-                    line_tmp = [item['likes']['count'], ph_size['url']]
-                elif ph_size['type'] == 'm':
-                    line_tmp = [item['likes']['count'], ph_size['url']]
-                elif ph_size['type'] == 's':
-                    line_tmp = [item['likes']['count'], ph_size['url']]
-                elif ph_size['type'] == 'o':
-                    line_tmp = [item['likes']['count'], ph_size['url']]
-            line.append(line_tmp)
-        sorted_list = sorted(line, key=itemgetter(0))
-        list = sorted_list[-3:]
-    except KeyError:
-        pass
-    return list
-
-def to_file(big_res):
-    with open('search_result.json', 'w', encoding='utf8') as f:
-        json.dump(big_res, f, ensure_ascii=False, indent=1)
-    print('Готово')
-
-
-def to_bd(big_res):
-    client = MongoClient()
-    tindvk_db = client['tvk']
-    data = tindvk_db['data']
-    if tindvk_db['data']:
-        data.drop()
-    for item in big_res:
-        data.insert_one(item)
-    pprint(data.find())
-#    pprint(list(data.find().sort()))
-
-def data_analyse(data):
+def data_analyse(data, user):
     for item in data:
         counter = 0
         try:
@@ -204,23 +135,27 @@ def data_analyse(data):
         yield user_count
 
 
+def menu():
+    while True:
+        print('___VKinder___')
+        command = input('''
+                    1. Ввод VK id или имени
+                    2. Вывод результатов из БД
+                    ''')
+        if command == '1':
+            list = []
+            user_id, token, age, books, interests, movies, music, relation, sex = get_user_data()
+            user = VK_USER(token, user_id)
+            user.user_stat(age, books, interests, movies, music, relation, sex)
+            get_friend_list(user)
+            data = search(user)
+            for item in data_analyse(data, user):
+                list.append(item)
+            itogo = sorted(list, key=itemgetter(1))
+            get_photo(itogo[-10:], user)
+        elif command == '2':
+            show_bd()
+
+
 if __name__ == '__main__':
-    list = []
-    user_id, token, age, books, interests, movies, music, relation, sex = get_user_data()
-    user = VK_USER(token, user_id)
-    user.user_stat(age, books, interests, movies, music, relation, sex)
-    get_friend_list(user)
-    data = search(token)
-    for item in data_analyse(data):
-        list.append(item)
-    itogo = sorted(list, key=itemgetter(1))
-#    pprint(itogo)
-    get_photo(itogo[-10:])
-#    to_bd(itogo[-3:])
-
-
-
-
-
-
-
+    menu()
