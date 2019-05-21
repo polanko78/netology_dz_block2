@@ -7,6 +7,7 @@ from operator import itemgetter
 import requests
 import random
 from pymongo import MongoClient
+import json
 
 
 def get_user_data():
@@ -105,13 +106,17 @@ def get_photo(list):
         except KeyError:
             pass
         res = sort_photo(response.json())
-        try:
-            my_res = {'id': x[0], 'photo': res}
-        except IndexError:
+        if res == []:
             my_res = {'id': x[0], 'photo': 'нет фото'}
+        else:
+            photo_list = []
+            for pho in res:
+                photo_list.append(pho[1])
+            my_res = {'id': 'https://vk.com/id' + str(x[0]), 'photo': photo_list}
         big_res.append(my_res)
-    print('___________________ИТОГО______________________')
-    pprint(big_res)
+#    pprint(big_res)
+    to_file(big_res)
+    to_bd(big_res)
 
 
 def sort_photo(res):
@@ -135,6 +140,22 @@ def sort_photo(res):
         pass
     return list
 
+def to_file(big_res):
+    with open('search_result.json', 'w', encoding='utf8') as f:
+        json.dump(big_res, f, ensure_ascii=False, indent=1)
+    print('Готово')
+
+
+def to_bd(big_res):
+    client = MongoClient()
+    tindvk_db = client['tvk']
+    data = tindvk_db['data']
+    if tindvk_db['data']:
+        data.drop()
+    for item in big_res:
+        data.insert_one(item)
+    pprint(data.find())
+#    pprint(list(data.find().sort()))
 
 def data_analyse(data):
     for item in data:
@@ -182,16 +203,6 @@ def data_analyse(data):
         user_count = [item['id'], counter]
         yield user_count
 
-def to_bd(d):
-    client = MongoClient()
-    tindvk_db = client['tvk']
-    data = tindvk_db['data']
-    if tindvk_db['data']:
-        data.drop()
-    for item in d:
-        print(item)
-
-
 
 if __name__ == '__main__':
     list = []
@@ -206,6 +217,7 @@ if __name__ == '__main__':
 #    pprint(itogo)
     get_photo(itogo[-10:])
 #    to_bd(itogo[-3:])
+
 
 
 
