@@ -4,7 +4,7 @@ import time
 import requests
 import json
 from operator import itemgetter
-from dip_block2.class_vk import VK_USER
+from dip_block2.class_vk import Vk_User
 
 
 def get_photo(list, user):

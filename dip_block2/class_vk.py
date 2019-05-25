@@ -1,4 +1,4 @@
-class VK_USER:
+class Vk_User:
 
     def __init__(self, token, user_id):
         self.token = token

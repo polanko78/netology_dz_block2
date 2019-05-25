@@ -1,7 +1,8 @@
-from dip_block2.class_vk import VK_USER
+from dip_block2.class_vk import Vk_User
 from dip_block2.photo_file_work import *
 import webbrowser
 import time
+import re
 from datetime import datetime
 from operator import itemgetter
 import requests
@@ -85,7 +86,6 @@ def search(user):
     }
     response = requests.get('https://api.vk.com/method/users.search', params)
     res = response.json()
-    pprint(res)
     return res['response']['items']
 
 
@@ -93,24 +93,24 @@ def data_analyse(data, user):
     for item in data:
         counter = 0
         try:
-            b = item['books'].split(', ')
+            b = user.books.split(', ')
             for book in b:
-                if book in user.books:
-                    counter += 3
+                if re.search(book, item['books']):
+                    counter += 5
         except KeyError:
             pass
         try:
-            m = item['music'].split(', ')
+            m = user.music.split(', ')
             for music in m:
-                if music in user.music:
-                    counter += 1
+                if re.search(music, item['music']):
+                    counter += 2
         except KeyError:
             pass
         try:
-            i = item['interests'].split(', ')
+            i = user.interests.split(', ')
             for interest in i:
-                if interest in user.interests:
-                    counter += 2
+                if re.search(interest, item['interests']):
+                    counter += 4
         except KeyError:
             pass
         try:
@@ -125,7 +125,7 @@ def data_analyse(data, user):
             elif abs(age_tmp - user.age) == 2:
                 counter += 1
         user_id = item['id']
-        tmp_user = VK_USER(token, user_id)
+        tmp_user = Vk_User(token, user_id)
         get_friend_list(tmp_user)
         set1 = set(tmp_user.fr_list)
         set2 = set(user.fr_list)
@@ -146,7 +146,7 @@ def menu():
         if command == '1':
             list = []
             user_id, token, age, books, interests, movies, music, relation, sex = get_user_data()
-            user = VK_USER(token, user_id)
+            user = Vk_User(token, user_id)
             user.user_stat(age, books, interests, movies, music, relation, sex)
             get_friend_list(user)
             data = search(user)
